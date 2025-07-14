@@ -1,96 +1,44 @@
+import AdvocateCard from "./advocate-card";
 import { AdvocateDto } from "./models/advocate.model";
+import SearchBar from "./search-bar";
 
-export default async function Home() {
-  const response: Response = await fetch(`${process.env.BASE_PATH}/api/advocates`)
-  const { data: advocates}: { data: AdvocateDto[] } = await response.json()
+export default async function Home({ searchParams = { filter: ""} }: { searchParams: { filter: string } }) {
+  const filter = searchParams.filter;
+  const basePath = `${process.env.BASE_PATH}/api/advocates`;
+  const path = filter == null ? basePath : `${basePath}?filter=${filter}` 
+  const response: Response = await fetch(path);
+  // Todo: Error boundaries for failed fetches
+  const { data: advocates}: { data: AdvocateDto[] } = await response.json();
 
-  // const [advocates, setAdvocates] = useState([]);
-  // const [filteredAdvocates, setFilteredAdvocates] = useState([]);
+  if (advocates == null || advocates.length === 0) {
+    return <PageLayout>
+      <div>
+        No results found.
+      </div>
+    </PageLayout>
+  }
 
-  // useEffect(() => {
-  //   console.log("fetching advocates...");
-  //   fetch("/api/advocates").then((response) => {
-  //     response.json().then((jsonResponse) => {
-  //       setAdvocates(jsonResponse.data);
-  //       setFilteredAdvocates(jsonResponse.data);
-  //     });
-  //   });
-  // }, []);
+    return (
+      <PageLayout>
+        <div className="flex flex-wrap gap-3">
+          {advocates.map((advocate) => (
+            <AdvocateCard key={advocate.id} advocate={advocate} />
+          ))}
+        </div>
+      </PageLayout>
+    );
+}
 
-  // const onChange = (e) => {
-  //   const searchTerm = e.target.value;
-
-  //   document.getElementById("search-term").innerHTML = searchTerm;
-
-  //   console.log("filtering advocates...");
-  //   const filteredAdvocates = advocates.filter((advocate) => {
-  //     return (
-  //       advocate.firstName.includes(searchTerm) ||
-  //       advocate.lastName.includes(searchTerm) ||
-  //       advocate.city.includes(searchTerm) ||
-  //       advocate.degree.includes(searchTerm) ||
-  //       advocate.specialties.includes(searchTerm) ||
-  //       advocate.yearsOfExperience.includes(searchTerm)
-  //     );
-  //   });
-
-  //   setFilteredAdvocates(filteredAdvocates);
-  // };
-
-  // const onClick = () => {
-  //   console.log(advocates);
-  //   setFilteredAdvocates(advocates);
-  // };
-
+function PageLayout({ children }: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <div className="mx-auto w-full min-[1800px]:max-w-[1536px]">
-      <div className="flex-1 py-6">
-        <h1 className="text-4xl font-bold py-3">Solace Advocates</h1>
-        <br />
-        <br />
-        {/* <div>
-          <p>Search</p>
-          <p>
-            Searching for: <span id="search-term"></span>
-          </p>
-          <input style={{ border: "1px solid black" }} onChange={onChange} />
-          <button onClick={onClick}>Reset Search</button>
-        </div> */}
-        <br />
-        <br />
-        <table>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>City</th>
-              <th>Degree</th>
-              <th>Specialties</th>
-              <th>Years of Experience</th>
-              <th>Phone Number</th>
-            </tr>
-          </thead>
-          <tbody>
-            {advocates.map((advocate) => {
-              return (
-                <tr key={advocate.id}>
-                  <td>{advocate.firstName}</td>
-                  <td>{advocate.lastName}</td>
-                  <td>{advocate.city}</td>
-                  <td>{advocate.degree}</td>
-                  <td>
-                    {advocate.specialties.map((s, index) => (
-                      <div key={index}>{s}</div>
-                    ))}
-                  </td>
-                  <td>{advocate.yearsOfExperience}</td>
-                  <td>{advocate.phoneNumber}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="flex flex-col p-6 gap-5">
+          <h1 className="text-4xl font-bold py-3">Solace Advocates</h1>
+          <SearchBar />
+          {children}
+        </div>
       </div>
-    </div>
-  );
+  )
 }

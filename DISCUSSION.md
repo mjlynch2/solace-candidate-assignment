@@ -9,6 +9,7 @@
 
 ## Frontend
 
+- The search bar should have a search button that, on click, pushes the query param to the router, rather than on key input, so we're not spamming requests
 - Design-wise, I don't love a single text box search across multiple potential field - I find the experience to lack fluidity. I think a better approach would have been something like:
   - a text search for first name/ last name
   - ability to sort by years of experience
